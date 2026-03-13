@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Interactive Dashboard</title>
+
+<style>
+body{
+font-family: Arial;
+background:#f4f4f4;
+text-align:center;
+}
+
+.container{
+width:80%;
+margin:auto;
+}
+
+.card{
+background:white;
+padding:20px;
+margin:20px;
+border-radius:10px;
+box-shadow:0 0 10px gray;
+}
+
+button{
+padding:10px 15px;
+background:blue;
+color:white;
+border:none;
+border-radius:5px;
+cursor:pointer;
+}
+
+input{
+padding:8px;
+margin:5px;
+}
+
+li{
+list-style:none;
+padding:5px;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>Interactive Data Dashboard</h1>
+
+<div class="container">
+
+<!-- Random User -->
+<div class="card">
+<h2>Random User Generator</h2>
+<button onclick="generateUser()">Generate User</button>
+<div id="user"></div>
+</div>
+
+<!-- Weather -->
+<div class="card">
+<h2>Weather Search</h2>
+<input id="city" placeholder="Enter City">
+<button onclick="getWeather()">Search</button>
+<div id="weather"></div>
+</div>
+
+<!-- Todo List -->
+<div class="card">
+<h2>Todo List</h2>
+<input id="taskInput" placeholder="Enter task">
+<button onclick="addTask()">Add</button>
+<ul id="taskList"></ul>
+</div>
+
+<!-- Live Search -->
+<div class="card">
+<h2>Product Search</h2>
+<input type="text" id="search" onkeyup="filterProducts()" placeholder="Search product">
+
+<ul id="products">
+<li>Laptop</li>
+<li>Phone</li>
+<li>Headphones</li>
+<li>Keyboard</li>
+<li>Mouse</li>
+<li>Camera</li>
+<li>Smartwatch</li>
+<li>Tablet</li>
+<li>Speaker</li>
+<li>Monitor</li>
+</ul>
+
+</div>
+
+</div>
+
+<script>
+
+function generateUser(){
+
+fetch("https://randomuser.me/api/")
+.then(res=>res.json())
+.then(data=>{
+
+let user=data.results[0]
+
+document.getElementById("user").innerHTML=`
+
+<img src="${user.picture.medium}">
+<p>Name: ${user.name.first} ${user.name.last}</p>
+<p>Email: ${user.email}</p>
+<p>Country: ${user.location.country}</p>
+
+`
+
+})
+
+}
+
+function getWeather(){
+
+let city=document.getElementById("city").value
+
+fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${city}`)
+.then(res=>res.json())
+.then(data=>{
+
+let lat=data.results[0].latitude
+let lon=data.results[0].longitude
+
+fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)
+.then(res=>res.json())
+.then(weather=>{
+
+let w=weather.current_weather
+
+document.getElementById("weather").innerHTML=`
+
+<p>Temperature: ${w.temperature}°C</p>
+<p>Wind Speed: ${w.windspeed}</p>
+<p>Weather Code: ${w.weathercode}</p>
+
+`
+
+})
+
+})
+
+}
+
+function addTask(){
+
+let input=document.getElementById("taskInput")
+
+let li=document.createElement("li")
+
+li.innerHTML=input.value + " <button onclick='removeTask(this)'>Delete</button>"
+
+li.onclick=function(){
+li.style.textDecoration="line-through"
+}
+
+document.getElementById("taskList").appendChild(li)
+
+input.value=""
+
+}
+
+function removeTask(btn){
+
+btn.parentElement.remove()
+
+}
+
+function filterProducts(){
+
+let input=document.getElementById("search").value.toLowerCase()
+
+let items=document.querySelectorAll("#products li")
+
+items.forEach(function(item){
+
+if(item.textContent.toLowerCase().includes(input))
+item.style.display="block"
+else
+item.style.display="none"
+
+})
+
+}
+
+</script>
+
+</body>
+</html>
